@@ -1,27 +1,29 @@
 import React from 'react';
-import MaterialTable from 'material-table';
-import { Card, TextField, Avatar } from "@material-ui/core";
-import { createMuiTheme, MuiThemeProvider, ThemeProvider } from '@material-ui/core/styles';
+import MaterialTable, { MTableToolbar } from 'material-table';
+import { Card, TextField, Avatar, Chip, Grid } from "@material-ui/core";
+import moment from 'moment';
+import MomentUtils from '@date-io/moment';
+import {
+  MuiPickersUtilsProvider,
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
 
 import {useDataContext} from '../DataContext';
 
 import {API_URL} from '../constants';
-
-const theme = createMuiTheme({
-    palette: {
-      primary: {
-        main: '#4caf50',
-      },
-      secondary: {
-        main: '#ff9100',
-      },
-    },
-
-  });
 export default function Table (props) {
+  const [selectedStartDate, setSelectedStartDate] = React.useState(new moment().add(-1, 'months'));
+  const [selectedEndDate, setSelectedEndDate] = React.useState(new moment());
+
+  const handleStartDateChange = (date) => {
+    setSelectedStartDate(date);
+  };
+  const handleEndDateChange = (date) => {
+    setSelectedEndDate(date);
+  };
     const {getData} = useDataContext();
     return (
-        <MuiThemeProvider theme={theme}>
+      <MuiPickersUtilsProvider utils={MomentUtils}>
         <MaterialTable
             title=""
             columns={[
@@ -35,23 +37,59 @@ export default function Table (props) {
             { title: 'Emp. ID', field: 'empID' },
             { title: 'First name', field: 'firstName' },
             { title: 'Last name', field: 'lastName' },
-            { title: 'gender', field: 'gender' },
+            { title: 'gender', field: 'gender',
+              render: rowData => <Chip label={rowData.gender} />
+            },
             { title: 'Email', field: 'email' },
+            { title: 'Checkin At', field: 'createdAt' },
             ]}
+            title="Please specific date range"
+            components={{
+              Toolbar: props => (
+                  <div style={{ backgroundColor: '#e8eaf5' }}>
+                      <MTableToolbar {...props} />
+                      <Grid container spacing={3} style={{marginLeft: 15}}justify={"flex-start"}>
+                      <Grid item >
+                      <KeyboardDatePicker
+                        margin="normal"
+                        id="date-picker-dialog"
+                        label="start date"
+                        format="YYYY/MM/DD"
+                        value={selectedStartDate}
+                        onChange={handleStartDateChange}
+                        KeyboardButtonProps={{
+                          'aria-label': 'change date',
+                        }}
+                        size="small"
+                      /></Grid>
+                      <Grid item >
+                      <KeyboardDatePicker
+                        margin="normal"
+                        id="date-picker-dialog"
+                        label="end date"
+                        format="YYYY/MM/DD"
+                        value={selectedEndDate}
+                        onChange={handleEndDateChange}
+                        KeyboardButtonProps={{
+                          'aria-label': 'change date',
+                        }}
+                        size="small"
+                      /></Grid></Grid>
+                      <br />
+                  </div>
+              )
+            }}
             options={{
                 search: true,
                 exportButton: true,
                 paging: true,
-                filtering: true,
                 pageSize: 20,
-                pageSizeOptions: [5,10,20,50]
-            }}
-            options={{
-              rowStyle: {
-                height: '30px !important',
-                padding:  0,
-
-              }
+                pageSizeOptions: [5,10,20,50],
+                rowStyle: {
+                  height: '30px !important',
+                  padding:  0,
+  
+                }
             }}
             actions={[
                 {
@@ -85,7 +123,6 @@ export default function Table (props) {
                 })
             })
             }
-        />
-        </MuiThemeProvider>
+        /></MuiPickersUtilsProvider>
     )
 }

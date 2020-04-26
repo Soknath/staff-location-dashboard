@@ -3,7 +3,9 @@ import {useContext, createContext } from 'react';
 
 export const AppContext = createContext({
     data: null,
-    getData: () => {}
+    getData: () => {},
+    selectId: null,
+    getSelectID: () => {}
 })
 
 export function useDataContext () {
