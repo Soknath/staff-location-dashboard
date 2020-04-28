@@ -1,8 +1,8 @@
-import React from 'react';
-import MapGL, { Marker, Popup, FullscreenControl, GeolocateControl, NavigationControl } from '@urbica/react-map-gl';
+import React, {useEffect} from 'react';
+import MapGL, {Marker, Popup, FullscreenControl, GeolocateControl, NavigationControl } from '@urbica/react-map-gl';
 import Cluster from '@urbica/react-map-gl-cluster';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import {useDataContext} from '../DataContext';
+import {useDataContext, useIDContext} from '../DataContext';
 import StaffInfo from './Popup';
 
 const style = {
@@ -36,12 +36,22 @@ export default function Map () {
     const [popupInfo, setPopupInfo] = React.useState(null);
 
     const {data} = useDataContext();
+    const {selectedID, getSelectedID} = useIDContext();
+
+    useEffect(()=> {
+      if(selectedID && selectedID.latitude){
+        setViewport({...viewport, 
+          latitude: selectedID.latitude, longitude: selectedID.longitude, zoom: 18
+        })
+        setPopupInfo(selectedID);
+        getSelectedID(null);
+      };
+    });
 
     const onMarkerClick = (e) => {
         console.log(e);
         setPopupInfo(e);
     };
-
     const _renderPopup = () => {
         return (
           popupInfo && (
@@ -67,11 +77,15 @@ export default function Map () {
         <MapGL
         style={{ width: '100%', height: '400px' }}
         mapStyle={
-          "https://search.map.powermap.in.th/api/v2/map/vtile/styles?name=thailand_en&access_token=b378c575291af30a29f59919fd7e7e4c012d45c4"
+          "https://search.map.powermap.in.th/api/v2/map/vtile/styles?name=thailand_th_black&access_token=b378c575291af30a29f59919fd7e7e4c012d45c4"
         }
         {...viewport}
-        onViewportChange={(viewport) => setViewport(viewport)}
+        onViewportChange={(viewport) => {
+          setViewport(viewport);
+        }}
         dragPan= {true}
+        viewportChangeMethod={"flyTo"}
+        viewportChangeOptions={1200}
         >
         {_renderPopup()}
         <Cluster radius={40} extent={512} nodeSize={64} component={ClusterMarker}>

@@ -22,12 +22,18 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const [data, setData] = React.useState(null);
+  const [selectedID, setSelectedID] = React.useState(null);
 
   const getData = (data) => {
     setData(data)
   }
+  const getSelectedID = (data) => {
+    setSelectedID(data)
+  }
+
+
   return (
-    <AppContext.Provider value={{data, getData}} >
+    <AppContext.Provider value={{data, selectedID, getData, getSelectedID}} >
       <div className={classes.root}>
         <Grid container spacing={1}>
           <SearchBar />

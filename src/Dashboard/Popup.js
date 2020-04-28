@@ -15,7 +15,7 @@ export default function MediaControlCard(props) {
   const classes = useStyles();
 
   return (
-    <Grid container alignItems="left" className={classes.root} spacing={2}>
+    <Grid container alignItems="flex-start" className={classes.root} spacing={2}>
     <Grid item xs={3} 
         style={{margin: "auto"}}
     >
