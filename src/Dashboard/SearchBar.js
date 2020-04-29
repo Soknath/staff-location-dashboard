@@ -1,16 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import { fade, makeStyles, createMuiTheme,MuiThemeProvider } from '@material-ui/core/styles';
+import {useIDContext} from '../DataContext';
 import {COMPANY_DEPARTMENT} from '../constants';
+import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
   },
   title: {
     flexGrow: 1,
@@ -35,13 +35,34 @@ const theme = createMuiTheme({
 
 
 export default function SearchAppBar() {
+  const {getSelectedHeatMap} = useIDContext();
+  const [heatMap, setHeatMap] = useState(false);
+  
+  const handleChange = (event) => {
+    setHeatMap(event.target.checked);
+    getSelectedHeatMap(event.target.checked);
+  };
+
   const classes = useStyles();
   return (
     <MuiThemeProvider theme={theme}>
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar variant="dense">
+          <Typography className={classes.title}>
           <img src="/dashboard/Logo4.png" height="50" alt={"logo"} />
+          </Typography>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={heatMap}
+                onChange={handleChange}
+                name="heatMap"
+                color="secondary"
+              />
+            }
+            label="Heat Map"
+          />
         </Toolbar>
       </AppBar>
     </div>

@@ -1,12 +1,16 @@
-import React, {useEffect} from 'react';
-import MapGL, {AttributionControl, Marker, Popup, FullscreenControl, GeolocateControl, NavigationControl } from '@urbica/react-map-gl';
+import React, {useEffect, useRef} from 'react';
+import ReactMapGL, {AttributionControl, Marker, Popup, FullscreenControl, GeolocateControl, NavigationControl } from '@urbica/react-map-gl';
 import Cluster from '@urbica/react-map-gl-cluster';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import {useDataContext, useIDContext} from '../DataContext';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import Grid from '@material-ui/core/Grid';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import StaffInfo from './Popup';
 import SatelliteStyle from '../SatelliteStyle';
+var HeatmapOverlay = require('react-map-gl-heatmap-overlay');
+var window = require('global/window');
 
 const style = {
     width: '20px',
@@ -35,9 +39,10 @@ const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,
   c0,0,0.1,0.1,0.1,0.2c0.2,0.3,0.4,0.6,0.7,0.9c2.6,3.1,7.4,7.6,7.4,7.6s4.8-4.5,7.4-7.5c0.2-0.3,0.5-0.6,0.7-0.9
   C20.1,15.8,20.2,15.8,20.2,15.7z`;
 
-const SIZE = 20;
+const SIZE = 25;
 
 export default function Map () {
+  const mapRef = useRef(null);
     const [viewport, setViewport] = React.useState({
         longitude: 100.594699,
         latitude: 14.244686, 
@@ -54,7 +59,7 @@ export default function Map () {
     };
 
     const {data} = useDataContext();
-    const {selectedID, getSelectedID} = useIDContext();
+    const {selectedID, getSelectedID, heatMap} = useIDContext();
 
     useEffect(()=> {
       if(selectedID && selectedID.latitude){
@@ -67,7 +72,6 @@ export default function Map () {
     });
 
     const onMarkerClick = (e) => {
-        console.log(e);
         setPopupInfo(e);
     };
     const _renderPopup = () => {
@@ -90,10 +94,15 @@ export default function Map () {
         );
     }
     
-    if(!data) return null;
+    const onLoad = () => console.log('mapRef.current is ready for use', mapRef.current);
+    
+    if(!data) return (
+      <Grid container justify="center" alignItems="center"><CircularProgress /></Grid>
+    )
     return (
-      <>
-        <MapGL
+      <div>
+        <ReactMapGL
+        ref={ref => mapRef.current = ref && ref.getMap()} onLoad={onLoad}
         style={{ width: '100%', height: 'calc(100vh - 48px)' }}
         // mapStyle={
         //   "https://search.map.powermap.in.th/api/v2/map/vtile/styles?name=thailand_th_black&access_token=b378c575291af30a29f59919fd7e7e4c012d45c4"
@@ -111,48 +120,51 @@ export default function Map () {
         viewportChangeOptions={1200}
         attributionControl={false}
         >
-          
+        {heatMap?
+          <HeatmapOverlay locations={data} {...viewport} width={mapRef.current?mapRef.current._canvas.clientWidth:0} height={mapRef.current?mapRef.current._canvas.clientHeight:0}/>
+          :
+          <Cluster radius={40} extent={512} nodeSize={64} component={ClusterMarker}>
+              {data.map(point => (
+              <Marker
+                  key={point.id}
+                  longitude={point.longitude}
+                  latitude={point.latitude}
+              >
+              <svg
+                  height={SIZE}
+                  viewBox="0 0 24 24"
+                  style={{
+                      cursor: 'pointer',
+                      fill: '#d00',
+                      stroke: 'none',
+                      transform: `translate(0px,${SIZE}px)`
+                  }}
+                  onClick={() => onMarkerClick(point)}
+                  >
+                    <path d={ICON} />
+              </svg> 
+              </Marker>
+          ))}
+          </Cluster>
+        }
         <AttributionControl
           compact={false}
           position='bottom-right'
           customAttribution='Powered by Powermap'
         />
         {_renderPopup()}
-        <Cluster radius={40} extent={512} nodeSize={64} component={ClusterMarker}>
-            {data.map(point => (
-            <Marker
-                key={point.id}
-                longitude={point.longitude}
-                latitude={point.latitude}
-            >
-            <svg
-                height={SIZE}
-                viewBox="0 0 24 24"
-                style={{
-                    cursor: 'pointer',
-                    fill: '#d00',
-                    stroke: 'none',
-                    transform: `translate(0px,${SIZE}px)`
-                }}
-                onClick={() => onMarkerClick(point)}
-                >
-                <path d={ICON} />
-            </svg>
-            </Marker>
-        ))}
-        </Cluster>
 
         <NavigationControl showCompass showZoom position='top-right' />
         <FullscreenControl position='top-right' />
         <GeolocateControl position='top-right' fitBoundsOptions={{maxZoom: 14}}/>
-        </MapGL>
+        </ReactMapGL>
         <div style={navRightStyle}>
           <FormControlLabel
             control={<Switch checked={style.map} onChange={handleChange} name="map" />}
             label={style.map?"MAP":"Satellite"}
           />
         </div>
-      </>
+      </div>
     )
 
 }

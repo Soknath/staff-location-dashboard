@@ -6,6 +6,9 @@ export const AppContext = createContext({
     getData: () => {},
     selectId: null,
     getSelectedID: () => {},
+    heatMap: null,
+    getSelectedHeatMap: () => {},
+
 })
 
 export function useDataContext () {
@@ -14,6 +17,6 @@ export function useDataContext () {
 }
 
 export function useIDContext () {
-    const {selectedID, getSelectedID} = useContext(AppContext);
-    return {selectedID, getSelectedID};
+    const {selectedID, getSelectedID, heatMap, getSelectedHeatMap} = useContext(AppContext);
+    return {selectedID, getSelectedID, heatMap, getSelectedHeatMap};
 }

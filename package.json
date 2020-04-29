@@ -15,6 +15,8 @@
     "@urbica/react-map-gl": "^1.13.0",
     "@urbica/react-map-gl-cluster": "^0.2.0",
     "date-fns": "^2.12.0",
+    "global": "^4.4.0",
+    "immutable": "^4.0.0-rc.12",
     "install": "^0.13.0",
     "mapbox-gl": "^1.9.1",
     "match-sorter": "^4.1.0",
@@ -26,10 +28,12 @@
     "moment": "^2.24.0",
     "namor": "^2.0.2",
     "npm": "^6.14.4",
+    "r-dom": "^2.4.0",
     "react": "^16.13.1",
     "react-advanced-datetimerange-picker": "^1.0.11",
     "react-dates": "^21.8.0",
     "react-dom": "^16.13.1",
+    "react-map-gl-heatmap-overlay": "^1.1.4",
     "react-scripts": "3.4.1",
     "react-table": "^7.0.4",
     "styled-components": "^5.1.0",
@@ -59,6 +63,7 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^2.2.0"
+    "gh-pages": "^2.2.0",
+    "ify-loader": "^1.1.0"
   }
 }

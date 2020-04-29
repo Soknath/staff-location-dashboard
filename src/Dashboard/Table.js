@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import MaterialTable from 'material-table';
-import {Avatar, Chip, Grid, FormControl, InputLabel, MenuItem, Select, Button, Paper } from "@material-ui/core";
+import {Avatar, Chip, Grid, FormControl, InputLabel, MenuItem, Select, Button, Paper, CircularProgress } from "@material-ui/core";
 import moment from 'moment';
 import MomentUtils from '@date-io/moment';
 import {
@@ -29,7 +29,7 @@ export default function Table (props) {
         async function fetchData() {
             try {
                 let response = await fetch( API_URL + `/staff-locations?_limit=-1&_sort=createdAt:DESC&createdAt_gte=${new moment().startOf('day').toISOString()}`).then(res=>res.json())    
-                console.log(response);
+                
                 setData(response);
                 getData(response)
             } catch (error) {
@@ -49,12 +49,9 @@ export default function Table (props) {
                       companiesData.push(record.companyName)
                     }
                     if (!Object.keys(departmentsData).includes(record.companyName)) {
-                        console.log(record.companyName)
                         departmentsData[record.companyName] = [record.department]
                     } else {
-                        console.log(record.companyName)
                         departmentsData[record.companyName].push(record.department)
-                        console.log(departmentsData)
                     }
                     
                 })
@@ -65,7 +62,6 @@ export default function Table (props) {
             }
           }
           if (!companies || !departments){
-              console.log()
               fetchCompany();
         }
     },[company, department]);
@@ -76,7 +72,6 @@ export default function Table (props) {
             `${API_URL}/staff-locations?_limit=-1&_sort=createdAt:DESC&createdAt_gte=${new moment(selectedStartDate).startOf('day').toISOString()}&createdAt_lte=${new moment(selectedEndDate).endOf('day').toISOString()}&${company && company !== "ALL"?'company='+company:""}&${department && department !== "ALL"?'department='+department.replace("&","%26"):""}`
             )
           .then(res=>res.json())
-          console.log(response);
           setData(response)
           getData(response)
       } catch (error) {
@@ -95,7 +90,6 @@ export default function Table (props) {
         setCompany(company.target.value);
         setDepartment("ALL");
     };
-    console.log(department);
 
     const handleChangeDepartment = department => {
         setDepartment(department.target.value);
@@ -127,7 +121,6 @@ export default function Table (props) {
         });
         result += lineDelimiter;
       });
-      console.log(result);
       return result;
     }
     
@@ -148,7 +141,10 @@ export default function Table (props) {
     }
 
     if (!data || !companies || !departments){
-      return null;
+      return (
+        <Grid container justify="center" alignItems="center" 
+        style={{ minHeight: '100vh', maxWidth: '100%' }}><CircularProgress /></Grid>
+      )
     };
 
     return (
@@ -236,7 +232,6 @@ export default function Table (props) {
       </div>
         <MaterialTable 
             onRowClick={(event, rowData) => {
-              console.log(rowData);
               getSelectedID(rowData);
             }}
             title={`${_.uniqBy(data, "empID").length} persons`}
@@ -250,7 +245,10 @@ export default function Table (props) {
                 headerStyle: {maxWidth: 60},
                 cellStyle:{ padding: '0px'},
                 grouping: false,
-                render: rowData => <Avatar alt="selfie" src={API_URL + rowData.avatar.url} style={{width: 30, height: 30}}/>
+                render: rowData => {
+                  let link = rowData.avatar.formats?rowData.avatar.formats.thumbnail.url:rowData.avatar.url;
+                  return <Avatar alt={rowData.firstName} src={API_URL + link } style={{width: 30, height: 30}}/>
+                }
             },
             { title: 'E. ID', field: 'empID'},
             { title: 'F. name', field: 'firstName',  headerStyle: {maxWidth: 60},
@@ -269,7 +267,7 @@ export default function Table (props) {
               return (
                 <Grid container spacing={2} style={{margin: 10}}>
                   <Grid item>
-                  <Avatar alt="selfie" src={API_URL + rowData.avatar.url} style={{width: 150, height: 150}}/>
+                  <Avatar alt={rowData.firstName} src={API_URL + rowData.avatar.url} style={{width: 150, height: 150}}/>
                   </Grid>
                   <Grid item>
                   <Chip label={rowData.gender} />  

@@ -23,6 +23,7 @@ function App() {
   const classes = useStyles();
   const [data, setData] = React.useState(null);
   const [selectedID, setSelectedID] = React.useState(null);
+  const [heatMap, setHeatMap] = React.useState(false);
 
   const getData = (data) => {
     setData(data)
@@ -30,10 +31,13 @@ function App() {
   const getSelectedID = (data) => {
     setSelectedID(data)
   }
+  const getSelectedHeatMap = (data) => {
+    setHeatMap(data)
+  }
 
 
   return (
-    <AppContext.Provider value={{data, selectedID, getData, getSelectedID}} >
+    <AppContext.Provider value={{data, selectedID, getData, getSelectedID, heatMap, getSelectedHeatMap}} >
       <div className={classes.root}>
         <SearchBar />
         <Grid container>

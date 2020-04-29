@@ -14,15 +14,15 @@ const useStyles = makeStyles((theme) => ({
 
 export default function MediaControlCard(props) {
   const classes = useStyles();
-
+  const link = props.info.avatar.formats?props.info.avatar.formats.thumbnail.url:props.info.avatar.url;
   return (
     <Grid container alignItems="flex-start" className={classes.root} spacing={2}>
     <Grid item xs={3} 
         style={{margin: "auto"}}
     >
         <Avatar
-            src={API_URL + props.info.avatar.url}
-            alt="props.info.firstName"
+            src={API_URL + link}
+            alt={props.info.firstName}
         />
     </Grid>
     <Grid item xs={9}>
