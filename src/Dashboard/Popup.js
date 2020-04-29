@@ -2,6 +2,7 @@ import React from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
+import Chip from '@material-ui/core/Chip';
 import Typography from '@material-ui/core/Typography';
 import {API_URL} from '../constants';
 
@@ -32,6 +33,9 @@ export default function MediaControlCard(props) {
         </Typography>
     </Grid>
     <Grid item xs={12}>
+        <div style={{flex: "right"}}>
+        <Chip label={props.info.healthStatus} /> 
+        </div>
         <Typography component="p" variant="p">
             {props.info.address}
         </Typography>

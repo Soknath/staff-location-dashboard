@@ -41,9 +41,7 @@ export default function SearchAppBar() {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar variant="dense">
-        <Typography variant="h6" className={classes.title}>
-          AAPICO STAFF LOCATION
-        </Typography>
+          <img src="/dashboard/Logo4.png" height="50" alt={"logo"} />
         </Toolbar>
       </AppBar>
     </div>

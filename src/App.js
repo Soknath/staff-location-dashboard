@@ -35,13 +35,15 @@ function App() {
   return (
     <AppContext.Provider value={{data, selectedID, getData, getSelectedID}} >
       <div className={classes.root}>
-        <Grid container spacing={1}>
-          <SearchBar />
-          <Grid item xs={12}>
+        <SearchBar />
+        <Grid container>
+          <Grid item xs={12} xl={6} lg={4}>
             <Map />
           </Grid>
-          <Grid item xs={12}>
-            <Table />
+          <Grid item xs={12} xl={6} lg={8}>
+            <div style={{height: '100%', overflowY: "scroll", overflowX: "scroll"}}>
+              <Table />
+            </div>
           </Grid>
         </Grid>
       </div>

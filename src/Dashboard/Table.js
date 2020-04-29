@@ -9,6 +9,7 @@ import {
 } from '@material-ui/pickers';
 import {COMPANY_DEPARTMENT} from '../constants';
 import {useDataContext, useIDContext} from '../DataContext';
+import _ from 'lodash';
 
 import {API_URL} from '../constants';
 
@@ -67,12 +68,12 @@ export default function Table (props) {
               console.log()
               fetchCompany();
         }
-    },[]);
+    },[company, department]);
 
     const searchData = async () => {
       try {
           let response = await fetch( 
-            `${API_URL}/staff-locations?_limit=-1&_sort=createdAt:DESC&createdAt_gte=${new moment(selectedStartDate).toISOString()}&createdAt_lte=${new Date(selectedEndDate).toISOString()}&${company?'company='+company:""}&${department?'department='+department:""}`
+            `${API_URL}/staff-locations?_limit=-1&_sort=createdAt:DESC&createdAt_gte=${new moment(selectedStartDate).startOf('day').toISOString()}&createdAt_lte=${new moment(selectedEndDate).endOf('day').toISOString()}&${company && company !== "ALL"?'company='+company:""}&${department && department !== "ALL"?'department='+department.replace("&","%26"):""}`
             )
           .then(res=>res.json())
           console.log(response);
@@ -92,8 +93,10 @@ export default function Table (props) {
     
     const handleChangeCompany = company => {
         setCompany(company.target.value);
-        setDepartment(null);
+        setDepartment("ALL");
     };
+    console.log(department);
+
     const handleChangeDepartment = department => {
         setDepartment(department.target.value);
     };
@@ -150,11 +153,15 @@ export default function Table (props) {
 
     return (
       <MuiPickersUtilsProvider utils={MomentUtils}>
-        <>
-        <Paper>
-          <div style={{ backgroundColor: '#e8eaf5' }}>
-          <Grid container spacing={3} style={{marginLeft: 15}} justify="center" alignItems="center">
-          <Grid item xs={2}>
+        <div style=
+          {{
+            height: 'calc(100vh - 48px)',
+            overflowY: 'scroll'
+          }}>
+        <Paper style={{"overflow": "hidden"}}>
+          <div style={{ backgroundColor: '#e8eaf5'}}>
+          <Grid container spacing={1} justify="center" alignItems="center">
+          <Grid item xs={6} md={3} style={{ height: 80}}>
           <KeyboardDatePicker
             margin="normal"
             id="date-picker-dialog"
@@ -168,7 +175,7 @@ export default function Table (props) {
             inputVariant="outlined"
             size="small"
           /></Grid>
-          <Grid item xs={2}>
+          <Grid item xs={6} md={3} style={{ height: 80}}>
           <KeyboardDatePicker
             margin="normal"
             id="date-picker-dialog"
@@ -183,32 +190,35 @@ export default function Table (props) {
             size="small"
           />
           </Grid>
-        <Grid item xs={2}>
-        <FormControl variant="outlined" fullWidth size="small" >
+        <Grid item xs={12} md={2}>
+        <div>
+        <FormControl variant="outlined" fullWidth style={{maxWidth: 266}} size="small" >
             <InputLabel id="demo-simple-select-outlined-label" >Company</InputLabel>
             <Select
                 labelId="demo-simple-select-outlined-label"
                 id="demo-simple-select-outlined"
-                value={company}
+                value={company?company:"ALL"}
                 onChange={handleChangeCompany}
                 label="Company"
             >
+            <MenuItem value={"ALL"} key={"first"}>{"ALL"}</MenuItem>
             {companies.map((comp, index) => (
                 <MenuItem value={comp} key={index}>{comp}</MenuItem>
             ))}
             </Select>
         </FormControl>
+        </div>
         </Grid>
-        <Grid item xs={2}>
-        <FormControl variant="outlined" fullWidth size="small" >
-            <InputLabel id="demo-simple-select-outlined-label">Department</InputLabel>
+        <Grid item xs={12} md={2}>
+        <FormControl variant="outlined" fullWidth style={{maxWidth: 266}} size="small" >
+            <InputLabel>Department</InputLabel>
             <Select
-            labelId="demo-simple-select-outlined-label"
-            id="demo-simple-select-outlined"
-            value={department}
-            onChange={handleChangeDepartment}
-            label="Department"
+              id="demo-simple-select-outlined"
+              value={department?department:"ALL"}
+              onChange={handleChangeDepartment}
+              label="Department"
             >
+            <MenuItem value={"ALL"} key={"first"}>{"ALL"}</MenuItem>
             {company?departments[company].map((depart, index) => (
                 <MenuItem value={depart} key={index}>{depart}</MenuItem>
             )):null}
@@ -220,38 +230,47 @@ export default function Table (props) {
           color="primary"
           size="large"
           onClick={() => searchData()}
+          size={"small"}
         >SEARCH</Button>
         </Grid>
       </div>
-    </Paper>
-        <MaterialTable
+        <MaterialTable 
             onRowClick={(event, rowData) => {
               console.log(rowData);
               getSelectedID(rowData);
             }}
-            title={`Total Found: ${data.length} person`}
+            title={`${_.uniqBy(data, "empID").length} persons`}
             columns={[
-            { title: 'Company', field: 'company' },
-            { title: 'Department', field: 'department' },
+            { title: 'Company', field: 'company'},
+            { title: 'Department', field: 'department', width: 50},
             {
                 field: 'url',
                 title: 'Avatar',
-                width: 30,
                 export: false,
-                render: rowData => <Avatar alt="selfie" src={API_URL + rowData.avatar.formats.small.url} style={{width: 30, height: 30}}/>
+                headerStyle: {maxWidth: 60},
+                cellStyle:{ padding: '0px'},
+                grouping: false,
+                render: rowData => <Avatar alt="selfie" src={API_URL + rowData.avatar.url} style={{width: 30, height: 30}}/>
             },
-            { title: 'Emp. ID', field: 'empID' },
-            { title: 'First name', field: 'firstName' },
-            { title: 'Last name', field: 'lastName' },
-            { title: 'Gender', field: 'gender', hidden: true, export: true },
-            { title: 'Email', field: 'email', hidden: true, export: true },
-            { title: 'Address', field: 'address', hidden: true, export: true },
-            { title: 'Checkin At', field: 'createdAt', 
-              render: rowData => new Date(rowData.createdAt).toLocaleString()},
+            { title: 'E. ID', field: 'empID'},
+            { title: 'F. name', field: 'firstName',  headerStyle: {maxWidth: 60},
+            grouping: false },
+            { title: 'L. name', field: 'lastName', headerStyle: {maxWidth: 40},
+            grouping: false },
+            { title: 'Health', field: 'healthStatus', headerStyle: {maxWidth: 60},
+            grouping: false },
+            { title: 'Gender', field: 'gender', hidden: true, export: true, grouping: false },
+            { title: 'Email', field: 'email', hidden: true, export: true, grouping: false },
+            { title: 'Address', field: 'address', hidden: true, export: true, grouping: false },
+            { title: 'At', field: 'createdAt', grouping: false,  headerStyle: {minWidth: 120}, width: 120,
+              render: rowData => new Date(rowData.createdAt).toLocaleString()}
             ]}
             detailPanel={rowData => {
               return (
                 <Grid container spacing={2} style={{margin: 10}}>
+                  <Grid item>
+                  <Avatar alt="selfie" src={API_URL + rowData.avatar.url} style={{width: 150, height: 150}}/>
+                  </Grid>
                   <Grid item>
                   <Chip label={rowData.gender} />  
                   </Grid>
@@ -274,9 +293,8 @@ export default function Table (props) {
                 exportCsv: (columns, data) => {
                   downloadCSV(columns, data);
                 },
-                pageSizeOptions: [5,10,20,50],
-                cellStyle: {height:40, paddingTop:0, paddingBottom:0, textAlign: "right"},
-                headerStyle: {textAlign: "right"}
+                pageSizeOptions: [5,10,20,50,100,500],
+                cellStyle: {height: 30, paddingTop:0, paddingBottom:0}
             }}
             // actions={[
             //     {
@@ -291,6 +309,6 @@ export default function Table (props) {
             // ]}
             data={data}
         />
-        </></MuiPickersUtilsProvider>
+    </Paper></div></MuiPickersUtilsProvider>
     )
 }
